@@ -85,7 +85,7 @@ struct LogView: View {
                 }
                 List {
                     ForEach(activities, id: \.self) { (section: [Activity]) in
-                        Section(header: Text(self.sectionHeader(forCreationDate: section[0].createdAt)).font(Font.headline.smallCaps())) {
+                        Section {
                             ForEach(section, id: \.self) { (activity: Activity) in
                                 if !showOnlyUncategorizedActivities || (showOnlyUncategorizedActivities && activity.category == nil) {
                                     Button(action: {
@@ -115,9 +115,12 @@ struct LogView: View {
                                     deleteActivity(atRow: rowIndex, section: sectionIndex)
                                 }
                             })
+                        } header: {
+                            Text(self.sectionHeader(forCreationDate: section[0].createdAt))
+                                .font(Font.headline.smallCaps())
                         }
                     }
-                }
+                }.listStyle(.plain)
             }.sheet(isPresented: $isOnboardingPresented) {
                 LogOnboardingView()
             }

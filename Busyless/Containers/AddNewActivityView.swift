@@ -27,10 +27,10 @@ struct AddNewActivityView: View {
     @State private var createdAt: Date
     @State private var notes: String
 
-    @State private var isActivityNameFirstResponder: Bool
-
     @Environment(\.managedObjectContext)
     private var managedObjectContext
+
+    @FocusState private var activityNameFocused: Bool
 
     private var isEditingExistingActivity: Bool
 
@@ -54,51 +54,47 @@ struct AddNewActivityView: View {
         let calculatedDuration = activity?.duration.asHoursAndMinutes
         _hoursDuration = State(initialValue: calculatedDuration?.hours ?? 0)
         _minutesDuration = State(initialValue: calculatedDuration?.minutes ?? 30)
-
-        _isActivityNameFirstResponder = State(initialValue: activity == nil)
     }
 
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    Section {
-                        FirstResponderTextField("Activity Name", text: $name, isFirstResponder: $isActivityNameFirstResponder)
-                            .autocapitalization(.words)
-                        NavigationLink(destination: CategorySelection(selectedCategory: $category)) {
-                            Text("Category").bold()
+            Form {
+                Section(header: Spacer()) {
+                    TextField("Activity Name", text: $name)
+                        .focused($activityNameFocused)
+                        .autocapitalization(.words)
+                    NavigationLink(destination: CategorySelection(selectedCategory: $category)) {
+                        Text("Category").bold()
+                        Spacer()
+                        Text("\(category?.name ?? "")")
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
+                    HStack(alignment: .top) {
+                        Text("Duration").bold()
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Stepper("\(hoursDuration) hrs", value: $hoursDuration, in: 0...23).fixedSize()
                             Spacer()
-                            Text("\(category?.name ?? "")")
-                                .foregroundColor(.gray)
-                                .lineLimit(1)
+                            Stepper("\(minutesDuration) mins", value: $minutesDuration, in: 0...45, step: 15).fixedSize()
                         }
-                        HStack(alignment: .top) {
-                            Text("Duration").bold()
-                            Spacer()
-                            VStack(alignment: .trailing) {
-                                Stepper("\(hoursDuration) hrs", value: $hoursDuration, in: 0...23).fixedSize()
-                                Spacer()
-                                Stepper("\(minutesDuration) mins", value: $minutesDuration, in: 0...45, step: 15).fixedSize()
-                            }
-                        }
-                        HStack {
-                            Text("When?").bold()
-                            Spacer()
-                            DatePicker("When?", selection: $createdAt)
-                                .datePickerStyle(CompactDatePickerStyle())
-                                .frame(maxWidth: 250, maxHeight: 25)
-                        }
+                    }
+                    HStack {
+                        Text("When?").bold()
+                        Spacer()
+                        DatePicker("When?", selection: $createdAt)
+                            .datePickerStyle(.compact)
+                            .frame(maxWidth: 250, maxHeight: 25)
+                    }
 
-                    }
-                    Section(header: Text("NOTES")) {
-                        TextEditor(text: $notes)
-                    }
+                }
+                Section(header: Text("NOTES")) {
+                    TextEditor(text: $notes)
                 }
             }
             .navigationBarTitle(isEditingExistingActivity ? "Edit Activity" : "Log New Activity")
             .navigationBarItems(leading:
                 Button(action: {
-                    self.isActivityNameFirstResponder = false
                     onComplete()
                 }, label: {
                     Text("Cancel")
@@ -106,12 +102,15 @@ struct AddNewActivityView: View {
                 Button(action: {
                     self.addActivity()
                     self.donateAddNewActivityIntent()
-                    self.isActivityNameFirstResponder = false
                     onComplete()
                 }, label: {
                     Text("Done")
                 }).disabled(!readyToSave))
-        }.navigationViewStyle(StackNavigationViewStyle())
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            activityNameFocused = activity?.name == nil
+        }
     }
 
     // MARK: - Private Methods

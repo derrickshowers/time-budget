@@ -92,7 +92,7 @@ struct DayView: View {
                     contextCategorySection(categories: categoriesWithNoContextCategory) { (row) in
                         deleteCategory(at: row.map({$0}).first ?? 0)
                     }.listRowBackground(Color.customWhite)
-                }
+                }.listStyle(.plain)
             }
             .onAppear { self.didAppear?(self) }
 
@@ -145,7 +145,7 @@ struct DayView: View {
                                         subtitle: String? = nil,
                                         categories: [BLCategory],
                                         onDelete: @escaping (IndexSet) -> Void) -> some View {
-        Section(header: contextCategoryHeader(name: title ?? "Other", timeBudgeted: subtitle)) {
+        Section {
             ForEach(categories, id: \.name) { category in
                 ZStack {
                     CategoryRow(category: category)
@@ -153,7 +153,10 @@ struct DayView: View {
                 }
             }
             .onDelete(perform: onDelete)
+        } header: {
+            contextCategoryHeader(name: title ?? "Other", timeBudgeted: subtitle)
         }
+
     }
 
     private func contextCategoryHeader(name: String, timeBudgeted: String?) -> some View {

@@ -57,20 +57,12 @@ struct SettingsView: View {
         Form {
             Section(header: Text("TIMES")) {
                 HStack {
-                    Text("Awake Time")
-                    Spacer()
                     DatePicker("Awake Time", selection: awakeTime, displayedComponents: .hourAndMinute)
-                        .datePickerStyle(GraphicalDatePickerStyle())
-                        .frame(maxWidth: 250)
-                        .padding(.trailing, -15)
+                        .datePickerStyle(.graphical)
                 }
                 HStack {
-                    Text("Sleepy Time")
-                    Spacer()
-                    DatePicker("Awake Time", selection: sleepTime, displayedComponents: .hourAndMinute)
-                        .datePickerStyle(GraphicalDatePickerStyle())
-                        .frame(maxWidth: 250)
-                        .padding(.trailing, -15)
+                    DatePicker("Sleepy Time", selection: sleepTime, displayedComponents: .hourAndMinute)
+                        .datePickerStyle(.graphical)
                 }
             }
             Section {
